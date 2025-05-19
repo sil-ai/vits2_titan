@@ -155,6 +155,6 @@ data_train = data.iloc[n_val + n_test:]
 data_val = data.iloc[:n_val]
 data_test = data.iloc[n_val: n_val + n_test]
 
-data_train.to_csv(vits_path+"/datasets/ljs_base/filelists/train.txt", sep="|", index=False, header=False)
-data_val.to_csv(vits_path+"/datasets/ljs_base/filelists/val.txt", sep="|", index=False, header=False)
-data_test.to_csv(vits_path+"/datasets/ljs_base/filelists/test.txt", sep="|", index=False, header=False)
+data_train.to_csv(vits_path+"/downloaded_datasets/train.txt", sep="|", index=False, header=False)
+data_val.to_csv(vits_path+"/downloaded_datasets/val.txt", sep="|", index=False, header=False)
+data_test.to_csv(vits_path+"/downloaded_datasets/test.txt", sep="|", index=False, header=False)

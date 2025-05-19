@@ -49,9 +49,9 @@ def get_hparams() -> HParams:
     assert os.path.exists(f"./datasets/{args.model}"), f"`{args.model}` not found in `./datasets/`"
     assert os.path.exists(f"./datasets/{args.model}/config.yaml"), f"`config.yaml` not found in `./datasets/{args.model}/`"
 
-    model_dir = f"./datasets/{args.model}/logs"
+    model_dir = f"./downloaded_datasets/logs/{args.model}"
     if not os.path.exists(model_dir):
-        os.makedirs(model_dir)
+        os.makedirs(model_dir, exist_ok=True)
 
     config_path = args.config
     hparams = get_hparams_from_file(config_path)
