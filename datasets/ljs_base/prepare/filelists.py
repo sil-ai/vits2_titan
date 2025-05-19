@@ -24,14 +24,14 @@ print(f"Using dataset path: {path}")
 link_name = 'DUMMY1'
 target_path = path
 
-if os.path.exists(target_path):
-    if not os.path.islink(link_name):
-        os.symlink(target_path, link_name)
-        print(f"Created symbolic link: {link_name} -> {target_path}")
-    else:
-        print(f"Symbolic link {link_name} already exists")
-else:
-    print(f"Warning: Target path {target_path} does not exist")
+# if os.path.exists(target_path):
+#     if not os.path.islink(link_name):
+#         os.symlink(target_path, link_name)
+#         print(f"Created symbolic link: {link_name} -> {target_path}")
+#     else:
+#         print(f"Symbolic link {link_name} already exists")
+# else:
+#     print(f"Warning: Target path {target_path} does not exist")
 
 from utils.hparams import get_hparams_from_file
 # See: https://github.com/espeak-ng/espeak-ng/blob/master/docs/languages.md
