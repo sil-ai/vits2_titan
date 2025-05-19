@@ -1,17 +1,14 @@
 FROM pytorch/pytorch:2.0.0-cuda11.7-cudnn8-runtime
-# FROM nvidia/cuda:11.7.1-cudnn8-devel-ubuntu20.04 nueva version
-# FROM pytorch/pytorch:2.0.0-cuda11.7-cudnn8-devel
 
+# Establecer el directorio de trabajo específico para el usuario aquintero
+WORKDIR /home/aquintero/vits2_train
 
-
-WORKDIR /app
-
-# Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     python3-dev \
     python3-pip \
     git \
+    make \
     espeak-ng \
     libsndfile1 \
     ffmpeg \
@@ -19,22 +16,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     bzip2 \
     && rm -rf /var/lib/apt/lists/*
 
-# Instalar requisitos de Python primero (para aprovechar la caché)
-COPY requirements.txt /app/
+RUN git clone https://github.com/sil-ai/vits2_titan.git .
+
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar todo el código fuente
-COPY . /app/
+ENV PYTHONPATH="/home/aquintero/vits2_train"
+ENV DATASET_PATH="/home/aquintero/vits2_train/downloaded_datasets/LJSpeech-1.1"
 
-# Asegurarse de que el Makefile existe y tiene permisos adecuados
-RUN ls -la /app/Makefile && chmod +x /app/Makefile
+RUN chmod -R 777 /home/aquintero/vits2_train
 
-# Variables de entorno
-ENV PYTHONPATH="/app"
-ENV DATASET_PATH="/app/downloaded_datasets/LJSpeech-1.1"
-RUN mkdir -p /app/datasets_local
-EXPOSE 6006
-
-RUN chmod -R 777 /app
-
-CMD ["all"]
+CMD ["make", "all"]
