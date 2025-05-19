@@ -17,8 +17,8 @@ datasets/madasr23_base/filelists
 
 venv/*
 venv/
-datasets/
-datasets/*
+# datasets/
+# datasets/*
 
 downloaded_datasets/
 downloaded_datasets/*

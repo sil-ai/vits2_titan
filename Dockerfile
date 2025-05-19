@@ -1,7 +1,7 @@
 FROM pytorch/pytorch:2.0.0-cuda11.7-cudnn8-runtime
 
 # Establecer el directorio de trabajo específico para el usuario aquintero
-WORKDIR /home/aquintero/vits2_train
+WORKDIR /home/aquintero/vits2_titan
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
@@ -16,13 +16,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     bzip2 \
     && rm -rf /var/lib/apt/lists/*
 
-RUN git clone https://github.com/sil-ai/vits2_titan.git .
+RUN git clone https://github.com/sil-ai/vits2_titan.git /home/aquintero/vits2_titan
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-ENV PYTHONPATH="/home/aquintero/vits2_train"
-ENV DATASET_PATH="/home/aquintero/vits2_train/downloaded_datasets/LJSpeech-1.1"
+RUN mkdir -p /home/aquintero/vits2_titan/downloaded_datasets
+ENV PYTHONPATH="/home/aquintero/vits2_titan"
+ENV DATASET_PATH="/home/aquintero/vits2_titan/downloaded_datasets/LJSpeech-1.1"
 
-RUN chmod -R 777 /home/aquintero/vits2_train
+RUN chmod -R 777 /home/aquintero/vits2_titan
 
 CMD ["make", "all"]
