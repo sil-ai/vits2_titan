@@ -126,7 +126,7 @@ text_norm = data["cleaned_text"].tolist()
 vocab = build_vocab_from_iterator(yield_tokens(text_norm), specials=special_symbols)
 vocab.set_default_index(UNK_ID)
 
-vocab_file = f"../vocab.txt"
+vocab_file = f"{vits_path}/downloaded_datasets/vocab.txt"
 save_vocab(vocab, vocab_file)
 
 vocab = load_vocab(vocab_file)

@@ -35,7 +35,7 @@ def _clean_text(text: str, vocab: Vocab, cleaner_names: List[str], language="en-
 if __name__ == "__main__":
     from utils.task import load_vocab
 
-    vocab = load_vocab("datasets/ljs_base/vocab.txt")
+    vocab = load_vocab("downloaded_datasets/vocab.txt")
     cleaner_names = ["phonemize_text", "add_spaces", "tokenize_text", "delete_unks", "add_bos_eos", "detokenize_sequence"]
     text = "Well, I like pizza. <laugh> You know … Who doesn't like pizza? <laugh>"
     print(tokenizer(text, vocab, cleaner_names, language="en-us", cleaned_text=False))
