@@ -1,4 +1,5 @@
 FROM pytorch/pytorch:2.0.0-cuda11.7-cudnn8-runtime
+# FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu20.04
 
 # Establecer el directorio de trabajo específico para el usuario aquintero
 WORKDIR /app
@@ -16,9 +17,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     bzip2 \
     && rm -rf /var/lib/apt/lists/*
 
+
 RUN git clone https://github.com/sil-ai/vits2_titan.git /app
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
 
 RUN mkdir -p /app/downloaded_datasets
 ENV PYTHONPATH="/app"

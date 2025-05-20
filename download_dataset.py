@@ -30,6 +30,13 @@ class DatasetDownloader:
 
     def extract_tar(self, filename):
         """Extract tar.bz2 file"""
+
+        dataset_dir = os.path.join('downloaded_datasets', 'LJSpeech-1.1')
+        if os.path.exists(dataset_dir) and os.listdir(dataset_dir):
+            print(f"El directorio {dataset_dir} ya existe y contiene archivos.")
+            print("Omitiendo la extracción...")
+            return
+
         print(f"Extracting {filename}...")
         with tarfile.open(filename, 'r:bz2') as tar:
             tar.extractall(path='downloaded_datasets')
@@ -46,10 +53,7 @@ class DatasetDownloader:
             self.download_file(self.dataset_url, self.dataset_file)
 
         # Extract if not already extracted
-        # if not os.path.exists(self.dataset_name):
         self.extract_tar(self.dataset_file)
-        # else:
-        #     print(f"Dataset {self.dataset_name} already exists")
 
         # Create symbolic link
         link_path = os.path.join("downloaded_datasets", "DUMMY1")
