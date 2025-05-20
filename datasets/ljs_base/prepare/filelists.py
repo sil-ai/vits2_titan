@@ -21,7 +21,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO, format=log_format, da
 path = os.environ.get('DATASET_PATH', vits_path + "/downloaded_datasets/LJSpeech-1.1")
 print(f"Using dataset path: {path}")
 
-link_name = 'DUMMY1'
+link_name = 'downloaded_datasets/DUMMY1'
 target_path = path
 
 # if os.path.exists(target_path):
@@ -37,7 +37,7 @@ from utils.hparams import get_hparams_from_file
 # See: https://github.com/espeak-ng/espeak-ng/blob/master/docs/languages.md
 dir_data = path
 config = vits_path+"/datasets/ljs_base/config.yaml"
-symlink = "DUMMY1"
+symlink = "downloaded_datasets/DUMMY1"
 # n_val = 100
 # n_test = 500
 n_val = 1
