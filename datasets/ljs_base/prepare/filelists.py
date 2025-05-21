@@ -37,7 +37,7 @@ from utils.hparams import get_hparams_from_file
 # See: https://github.com/espeak-ng/espeak-ng/blob/master/docs/languages.md
 dir_data = path
 config = vits_path+"/datasets/ljs_base/config.yaml"
-symlink = vits_path+"downloaded_datasets/DUMMY1"
+symlink = vits_path+"/downloaded_datasets/DUMMY1"
 # n_val = 100
 # n_test = 500
 n_val = 1
