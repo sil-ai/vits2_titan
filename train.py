@@ -29,7 +29,8 @@ def main():
     """Assume Single Node Multi GPUs Training Only"""
     assert torch.cuda.is_available(), "CPU training is not allowed."
 
-    n_gpus = torch.cuda.device_count()
+    # n_gpus = torch.cuda.device_count() # Comenta o elimina esta línea
+    n_gpus = 2  # Establece el número de GPUs que quieres usar, por ejemplo 1
     os.environ["MASTER_ADDR"] = "localhost"
     os.environ["MASTER_PORT"] = "8000"
 
@@ -60,10 +61,10 @@ def run(rank, n_gpus, hps):
     train_dataset = TextAudioLoader(hps.data.training_files, hps.data)
     train_sampler = DistributedBucketSampler(train_dataset, hps.train.batch_size, [32, 300, 400, 500, 600, 700, 800, 900, 1000], num_replicas=n_gpus, rank=rank, shuffle=True)
     collate_fn = TextAudioCollate()
-    train_loader = DataLoader(train_dataset, num_workers=8, shuffle=False, pin_memory=True, collate_fn=collate_fn, batch_sampler=train_sampler)
+    train_loader = DataLoader(train_dataset, num_workers=4, shuffle=False, pin_memory=True, collate_fn=collate_fn, batch_sampler=train_sampler)
     if rank == 0:
         eval_dataset = TextAudioLoader(hps.data.validation_files, hps.data)
-        eval_loader = DataLoader(eval_dataset, num_workers=8, shuffle=False, batch_size=hps.train.batch_size, pin_memory=True, drop_last=False, collate_fn=collate_fn)
+        eval_loader = DataLoader(eval_dataset, num_workers=4, shuffle=False, batch_size=hps.train.batch_size, pin_memory=True, drop_last=False, collate_fn=collate_fn)
 
     net_g = SynthesizerTrn(len(train_dataset.vocab), hps.data.n_mels if hps.data.use_mel else hps.data.n_fft // 2 + 1, hps.train.segment_size // hps.data.hop_length, **hps.model).cuda(rank)
     net_d = MultiPeriodDiscriminator(hps.model.use_spectral_norm).cuda(rank)
