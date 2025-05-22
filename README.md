@@ -91,7 +91,7 @@ python preprocess/mel_transform.py --data_dir /path/to/LJSpeech-1.1 -c datasets/
 4. rename or create a link to the dataset folder.
 
 ```shell
-ln -s /path/to/LJSpeech-1.1 DUMMY1
+ln -s /path/to/LJSpeech-1.1 downloaded_datasets/DUMMY1
 ```
 
 ### VCTK dataset
@@ -116,7 +116,7 @@ python preprocess/mel_transform.py --data_dir /path/to/VCTK-Corpus-0.92 -c datas
 5. rename or create a link to the dataset folder.
 
 ```shell
-ln -s /path/to/VCTK-Corpus-0.92 DUMMY2
+ln -s /path/to/VCTK-Corpus-0.92 downloaded_datasets/DUMMY2
 ```
 
 ### Custom dataset
@@ -153,7 +153,7 @@ python preprocess/mel_transform.py --data_dir /path/to/custom_dataset -c dataset
 7. rename or create a link to the dataset folder.
 
 ```shell
-ln -s /path/to/custom_dataset DUMMY3
+ln -s /path/to/custom_dataset downloaded_datasets/DUMMY3
 ```
 
 ## Training Examples
