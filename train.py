@@ -20,6 +20,8 @@ from losses import generator_loss, discriminator_loss, feature_loss, kl_loss, kl
 from utils.mel_processing import wav_to_mel, spec_to_mel, spectral_norm
 from utils.model import slice_segments, clip_grad_value_
 
+from utils.upload_to_s3 import upload_to_s3
+
 
 torch.backends.cudnn.benchmark = True
 global_step = 0
@@ -195,8 +197,13 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, schedulers, scaler, loade
             # Save checkpoint on CPU to prevent GPU OOM
             if global_step % hps.train.eval_interval == 0:
                 # evaluate(hps, net_g, eval_loader, writer_eval)
-                task.save_checkpoint(net_g, optim_g, hps.train.learning_rate, epoch, os.path.join(hps.model_dir, "G_{}.pth".format(global_step)))
-                task.save_checkpoint(net_d, optim_d, hps.train.learning_rate, epoch, os.path.join(hps.model_dir, "D_{}.pth".format(global_step)))
+                g_checkpoint_path = os.path.join(hps.model_dir, "G_{}.pth".format(global_step))
+                task.save_checkpoint(net_g, optim_g, hps.train.learning_rate, epoch, g_checkpoint_path)
+                upload_to_s3(g_checkpoint_path, hps.s3_bucket)
+
+                d_checkpoint_path = os.path.join(hps.model_dir, "D_{}.pth".format(global_step))
+                task.save_checkpoint(net_d, optim_d, hps.train.learning_rate, epoch, d_checkpoint_path)
+                upload_to_s3(d_checkpoint_path, hps.s3_bucket)
         global_step += 1
 
 
