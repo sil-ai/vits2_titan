@@ -2,6 +2,9 @@ import os
 import boto3
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError, ClientError
 import logging
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
 
 logger = logging.getLogger(__name__)
 
