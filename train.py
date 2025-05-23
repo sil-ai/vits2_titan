@@ -199,11 +199,11 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, schedulers, scaler, loade
                 # evaluate(hps, net_g, eval_loader, writer_eval)
                 g_checkpoint_path = os.path.join(hps.model_dir, "G_{}.pth".format(global_step))
                 task.save_checkpoint(net_g, optim_g, hps.train.learning_rate, epoch, g_checkpoint_path)
-                upload_to_s3(g_checkpoint_path, hps.s3_bucket)
+                upload_to_s3(g_checkpoint_path, "G_{}.pth".format(global_step))
 
                 d_checkpoint_path = os.path.join(hps.model_dir, "D_{}.pth".format(global_step))
                 task.save_checkpoint(net_d, optim_d, hps.train.learning_rate, epoch, d_checkpoint_path)
-                upload_to_s3(d_checkpoint_path, hps.s3_bucket)
+                upload_to_s3(d_checkpoint_path, "D_{}.pth".format(global_step))
         global_step += 1
 
 
