@@ -27,10 +27,9 @@ from utils.hparams import get_hparams_from_file
 dir_data = path
 config = vits_path+"/datasets/ljs_base/config.yaml"
 symlink = vits_path+"/downloaded_datasets/DUMMY1/wavs"
-# n_val = 100
-# n_test = 500
-n_val = 5
-n_test = 5
+
+n_val = 100
+n_test = 500
 
 logging.info(f"Step 1: Getting hparams from file")
 hps = get_hparams_from_file(config)
@@ -40,7 +39,7 @@ data = pd.read_csv(
     f"{dir_data}/metadata_copy.csv",
     sep=r"|",
     header=None,
-    nrows = 50,
+    # nrows = 50,
     names=["file", "text", "normalized_text", "cleaned_text"],
     index_col=False,
     # converter to add .wav to file name

@@ -1,220 +1,165 @@
-# VITS2: Improving Quality and Efficiency of Single-Stage Text-to-Speech with Adversarial Learning and Architecture Design
+# VITS2 Titan - High Performance Computing Implementation
 
-### Jungil Kong, Jihoon Park, Beomjeong Kim, Jeongmin Kim, Dohee Kong, Sangjin Kim
+This project is an HPC-optimized implementation of VITS2 (Variational Inference with adversarial learning for end-to-end Text-to-Speech), based on the work from [daniilrobnikov/vits2](https://github.com/daniilrobnikov/vits2).
 
-### SK Telecom, South Korea
+## About VITS2
 
-Single-stage text-to-speech models have been actively studied recently, and their results have outperformed two-stage pipeline systems. Although the previous single-stage model has made great progress, there is room for improvement in terms of its intermittent unnaturalness, computational efficiency, and strong dependence on phoneme conversion. In this work, we introduce VITS2, a single-stage text-to-speech model that efficiently synthesizes a more natural speech by improving several aspects of the previous work. We propose improved structures and training mechanisms and present that the proposed methods are effective in improving naturalness, similarity of speech characteristics in a multi-speaker model, and efficiency of training and inference. Furthermore, we demonstrate that the strong dependence on phoneme conversion in previous works can be significantly reduced with our method, which allows a fully end-to-end single-stage approach.
+VITS2 is an advanced single-stage text-to-speech model that efficiently synthesizes high-quality, natural speech through improved adversarial learning and architecture design. It represents a significant improvement over the original VITS model, offering:
 
-Demo: https://vits-2.github.io/demo/
+- **Enhanced Naturalness**: Improved speech quality with reduced artifacts
+- **Computational Efficiency**: Optimized training and inference processes
+- **Reduced Phoneme Dependency**: Supports fully end-to-end single-stage approach
+- **Multi-speaker Capabilities**: Support for multiple speakers (coming soon)
 
-Paper: https://arxiv.org/abs/2307.16430
+The original research paper: [VITS2: Improving Quality and Efficiency of Single-Stage Text-to-Speech with Adversarial Learning and Architecture Design](https://arxiv.org/abs/2307.16430)
 
-Unofficial implementation of VITS2. This is a work in progress. Please refer to [TODO](#todo) for more details.
+## Current Status
 
-<table style="width:100%">
-  <tr>
-    <th>Duration Predictor</th>
-    <th>Normalizing Flows</th>
-    <th>Text Encoder</th>
-  </tr>
-  <tr>
-    <td><img src="figures/figure01.png" alt="Duration Predictor" width="100%" style="width:100%"></td>
-    <td><img src="figures/figure02.png" alt="Normalizing Flows" width="100%" style="width:100%"></td>
-    <td><img src="figures/figure03.png" alt="Text Encoder" width="100%" style="width:100%"></td>
-  </tr>
-</table>
+**✅ Available**: Single-speaker model (`ljs_base`) - Fully functional for LJSpeech dataset training and inference
 
-## Audio Samples
+**🚧 Coming Soon**: Multi-speaker model support with VCTK dataset compatibility
 
-[In progress]
+## HPC Execution
 
-Audio sample after 52,000 steps of training on 1 GPU for LJSpeech dataset:
-https://github.com/daniilrobnikov/vits2/assets/91742765/d769c77a-bd92-4732-96e7-ab53bf50d783
+### Prerequisites
 
-## Installation:
+- Access to the Titan HPC cluster via [ORCA OnDemand](https://ood.orca.offn.onenet.net/)
+- Valid cluster credentials
+- AWS S3 credentials for model checkpoint storage
 
-<a name="installation"></a>
+### Execution Steps
 
-**Clone the repo**
+Follow these steps to execute the VITS2 training on the Titan HPC cluster:
 
-```shell
-git clone git@github.com:daniilrobnikov/vits2.git
-cd vits2
+#### 1. Access the HPC Cluster
+
+1. Navigate to [https://ood.orca.offn.onenet.net/](https://ood.orca.offn.onenet.net/)
+2. Log in with your provided credentials
+3. In the cluster section, click on **titan_shell_access** to access the terminal
+
+#### 2. Setup Working Directory
+
+Create the required dataset directory:
+```bash
+mkdir downloaded_datasets
+```
+#### 3. Download docker image and convert in .sif using:
+
+```bash
+module load singularity
+
+singularity cache clean -f
+singularity pull vits2.sif docker://alejandroquinterosil/vits2:latest
+
 ```
 
-## Setting up the conda env
+#### 4. Create Job Script
 
-This is assuming you have navigated to the `vits2` root after cloning it.
+Create a `job.sh` file with the following content. This script configures SLURM job parameters including:
+- Job name and resource allocation (4 nodes, GPU partition)
+- Output and error file redirection (`output.%j.out` and `myJob.%j.err`)
+- 2-day time limit for training completion
+- Email notifications for job status updates
+- Singularity container execution with GPU support and volume bindings
 
-**NOTE:** This is tested under `python3.11` with conda env. For other python versions, you might encounter version conflicts.
+```bash
+#!/bin/bash
 
-**PyTorch 2.0**
-Please refer [requirements.txt](requirements.txt)
+#SBATCH --job-name=vits2
+#SBATCH -o output.%j.out
+#SBATCH -e myJob.%j.err
+#SBATCH --partition=gpu
+#SBATCH --time=2-00:00
+#SBATCH -N 4
+#SBATCH --mail-user=your_email@domain.com
+#SBATCH --mail-type=ALL
 
-```shell
-# install required packages (for pytorch 2.0)
-conda create -n vits2 python=3.11
-conda activate vits2
-pip install -r requirements.txt
+module load singularity
 
-conda env config vars set PYTHONPATH="/path/to/vits2"
+singularity exec --env-file .env --nv --bind $PWD/downloaded_datasets:/app/downloaded_datasets --bind /usr/lib64/libcuda.so.550.127.05:/usr/local/cuda-12.4/compat/libcuda.so.550.54.15 vits2.sif bash -c "cd /app && make all"
 ```
 
-## Download datasets
+#### 5. Configure AWS Credentials
 
-There are three options you can choose from: LJ Speech, VCTK, or custom dataset.
+Create a `.env` file in the same directory with your AWS S3 credentials. Model checkpoints are automatically uploaded to S3 during training, which requires these credentials, use touch .env and nano .env to modify:
 
-1. LJ Speech: [LJ Speech dataset](#lj-speech-dataset). Used for single speaker TTS.
-2. VCTK: [VCTK dataset](#vctk-dataset). Used for multi-speaker TTS.
-3. Custom dataset: You can use your own dataset. Please refer [here](#custom-dataset).
-
-### LJ Speech dataset
-
-1. download and extract the [LJ Speech dataset](https://keithito.com/LJ-Speech-Dataset/)
-
-```shell
-wget https://data.keithito.com/data/speech/LJSpeech-1.1.tar.bz2
-tar -xvf LJSpeech-1.1.tar.bz2
-cd LJSpeech-1.1/wavs
-rm -rf wavs
+```bash
+AWS_ACCESS_KEY_ID=your_access_key_here
+AWS_SECRET_ACCESS_KEY=your_secret_key_here
+AWS_STORAGE_BUCKET_NAME=your_bucket_name_here
 ```
 
-3. preprocess mel-spectrograms. See [mel_transform.py](preprocess/mel_transform.py)
+**Important**: Replace the placeholder values with your actual AWS credentials.
 
-```shell
-python preprocess/mel_transform.py --data_dir /path/to/LJSpeech-1.1 -c datasets/ljs_base/config.yaml
+#### 6. Submit the Job
+
+Execute the training job using SLURM:
+```bash
+sbatch job.sh
 ```
 
-3. preprocess text. See [prepare/filelists.ipynb](datasets/ljs_base/prepare/filelists.ipynb)
+This will return a job ID (e.g., `Submitted batch job 12345`) which you can use to monitor the job status.
 
-4. rename or create a link to the dataset folder.
+#### 7. Monitor Job Execution
 
-```shell
-ln -s /path/to/LJSpeech-1.1 downloaded_datasets/DUMMY1
+The job execution generates two output files in your working directory:
+- **`myJob.{job_id}.err`**: Contains error messages and debugging information
+- **`output.{job_id}.out`**: Contains standard output and training progress logs
+
+To check if your job is still running, use:
+```bash
+squeue -u username
 ```
+Replace `username` with your actual cluster username.
 
-### VCTK dataset
+### Training Pipeline
 
-1. download and extract the [VCTK dataset](https://www.kaggle.com/datasets/showmik50/vctk-dataset)
+The container automatically executes the following workflow:
 
-```shell
-wget https://datashare.is.ed.ac.uk/bitstream/handle/10283/3443/VCTK-Corpus-0.92.zip
-unzip VCTK-Corpus-0.92.zip
-```
+1. **Dataset Download**: Downloads LJSpeech-1.1 dataset
+2. **Preprocessing**: Generates mel-spectrograms from audio files
+3. **File Lists Generation**: Creates training/validation splits and vocabulary
+4. **Training**: Initiates model training with distributed GPU support
 
-2. (optional): downsample the audio files to 22050 Hz. See [audio_resample.ipynb](preprocess/audio_resample.ipynb)
+### Configuration
 
-3. preprocess mel-spectrograms. See [mel_transform.py](preprocess/mel_transform.py)
+The training uses the default LJSpeech configuration located at `datasets/ljs_base/config.yaml`. Key parameters:
 
-```shell
-python preprocess/mel_transform.py --data_dir /path/to/VCTK-Corpus-0.92 -c datasets/vctk_base/config.yaml
-```
+- **Sample Rate**: 22.05 kHz
+- **Mel Channels**: 80
+- **Batch Size**: 32
+- **Training Epochs**: 20,000
+- **GPU Support**: Multi-GPU distributed training
 
-4. preprocess text. See [prepare/filelists.ipynb](datasets/ljs_base/prepare/filelists.ipynb)
+### Expected Outputs
 
-5. rename or create a link to the dataset folder.
+- **Model Checkpoints**: Automatically saved to your configured S3 bucket during training
+- **Local Logs**: Job execution logs in `myJob.{job_id}.err` and `output.{job_id}.out`
+- **Training Logs**: Available in TensorBoard format within the container
+- **Dataset**: Downloaded LJSpeech dataset stored in `downloaded_datasets/` directory
 
-```shell
-ln -s /path/to/VCTK-Corpus-0.92 downloaded_datasets/DUMMY2
-```
+### System Requirements
 
-### Custom dataset
+- **GPU Memory**: Minimum 8GB VRAM (16GB+ recommended for multi-GPU)
+- **Storage**: ~15GB for dataset and model checkpoints
+- **CPU**: Multi-core recommended for data preprocessing
 
-1. create a folder with wav files
-2. duplicate the `ljs_base` in `datasets` directory and rename it to `custom_base`
-3. open [custom_base](datasets/custom_base) and change the following fields in `config.yaml`:
+### Monitoring Training
 
-```yaml
-data:
-  training_files: datasets/custom_base/filelists/train.txt
-  validation_files: datasets/custom_base/filelists/val.txt
-  text_cleaners: # See text/cleaners.py
-    - phonemize_text
-    - tokenize_text
-    - add_bos_eos
-  cleaned_text: true # True if you ran step 6.
-  language: en-us # language of your dataset. See espeak-ng
-  sample_rate: 22050 # sample rate, based on your dataset
-  ...
-  n_speakers: 0 # 0 for single speaker, > 0 for multi-speaker
-```
+Monitor training progress through:
+- **Job Status**: Use `squeue -u username` to check if the job is running
+- **Output Logs**: Check `output.{job_id}.out` for training progress and metrics
+- **Error Logs**: Review `myJob.{job_id}.err` for any error messages
+- **S3 Checkpoints**: Model checkpoints are automatically uploaded to your S3 bucket
+- **Job Completion**: You'll receive email notifications when the job starts, completes, or fails
 
-4. preprocess mel-spectrograms. See [mel_transform.py](preprocess/mel_transform.py)
+### Support and Issues
 
-```shell
-python preprocess/mel_transform.py --data_dir /path/to/custom_dataset -c datasets/custom_base/config.yaml
-```
+For technical issues or questions:
+- Check the original [VITS2 repository](https://github.com/daniilrobnikov/vits2) for model-specific documentation
+- Review container logs for debugging information
+- Ensure proper GPU drivers and CUDA compatibility
 
-6. preprocess text. See [prepare/filelists.ipynb](datasets/ljs_base/prepare/filelists.ipynb)
+---
 
-**NOTE:** You may need to install `espeak-ng` if you want to use `phonemize_text` cleaner. Please refer [espeak-ng](https://github.com/espeak-ng/espeak-ng)
-
-7. rename or create a link to the dataset folder.
-
-```shell
-ln -s /path/to/custom_dataset downloaded_datasets/DUMMY3
-```
-
-## Training Examples
-
-```shell
-# LJ Speech
-python train.py -c datasets/ljs_base/config.yaml -m ljs_base
-
-# VCTK
-python train_ms.py -c datasets/vctk_base/config.yaml -m vctk_base
-
-# Custom dataset (multi-speaker)
-python train_ms.py -c datasets/custom_base/config.yaml  -m custom_base
-```
-
-## Inference Examples
-
-See [inference.ipynb](inference.ipynb) and [inference_batch.ipynb](inference_batch.ipynb)
-
-## Pretrained Models
-
-[In progress]
-
-## Todo
-
-- [ ] model (vits2)
-  - [x] update TextEncoder to support speaker conditioning
-  - [x] support for high-resolution mel-spectrograms in training. See [mel_transform.py](preprocess/mel_transform.py)
-  - [x] Monotonic Alignment Search with Gaussian noise
-  - [x] Normalizing Flows using Transformer Block
-  - [ ] Stochastic Duration Predictor with Time Step-wise Conditional Discriminator
-- [ ] model (YourTTS)
-  - [ ] Language Conditioning
-  - [ ] Speaker Encoder
-- [ ] model (NaturalSpeech)
-  - [x] KL Divergence Loss after Prior Enhancing
-  - [ ] GAN loss for e2e training
-- [ ] other
-  - [x] support for batch inference
-  - [x] special tokens in tokenizer
-  - [x] test numba.jit and numba.cuda.jit implementations of MAS. See [monotonic_align.py](monotonic_align.py)
-  - [ ] KL Divergence Loss between TextEncoder and Projection
-  - [ ] support for streaming inference. Please refer [vits_chinese](https://github.com/PlayVoice/vits_chinese/blob/master/text/symbols.py)
-  - [ ] use optuna for hyperparameter tuning
-- [ ] future work
-  - [ ] update model to vits2. Please refer [VITS2](https://arxiv.org/abs/2307.16430)
-  - [ ] update model to YourTTS with zero-shot learning. See [YourTTS](https://arxiv.org/abs/2112.02418)
-  - [ ] update model to NaturalSpeech. Please refer [NaturalSpeech](https://arxiv.org/abs/2205.04421)
-
-## Acknowledgements
-
-- This is unofficial repo based on [VITS2](https://arxiv.org/abs/2307.16430)
-- g2p for multiple languages is based on [phonemizer](https://github.com/bootphon/phonemizer)
-- We also thank GhatGPT for providing writing assistance.
-
-## References
-
-- [VITS2: Improving Quality and Efficiency of Single-Stage Text-to-Speech with Adversarial Learning and Architecture Design](https://arxiv.org/abs/2307.16430)
-- [Conditional Variational Autoencoder with Adversarial Learning for End-to-End Text-to-Speech](https://arxiv.org/abs/2106.06103)
-- [YourTTS: Towards Zero-Shot Multi-Speaker TTS and Zero-Shot Voice Conversion for everyone](https://arxiv.org/abs/2112.02418)
-- [NaturalSpeech: End-to-End Text to Speech Synthesis with Human-Level Quality](https://arxiv.org/abs/2205.04421)
-- [A TensorFlow implementation of Google's Tacotron speech synthesis with pre-trained model (unofficial)](https://github.com/keithito/tacotron)
-
-# VITS2
+**Note**: This implementation is optimized for HPC environments and includes containerized dependencies for reproducible training across different computing clusters.

@@ -33,8 +33,8 @@ class DatasetDownloader:
 
         dataset_dir = os.path.join('downloaded_datasets', 'LJSpeech-1.1')
         if os.path.exists(dataset_dir) and os.listdir(dataset_dir):
-            print(f"El directorio {dataset_dir} ya existe y contiene archivos.")
-            print("Omitiendo la extracción...")
+            print(f"The directory {dataset_dir} already exists and contains files.")
+            print("Skipping extraction...")
             return
 
         print(f"Extracting {filename}...")

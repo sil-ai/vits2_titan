@@ -22,3 +22,5 @@ venv/
 
 downloaded_datasets/
 downloaded_datasets/*
+
+.env

@@ -91,7 +91,7 @@ def process_batch(batch, sr_hps, n_fft, hop_size, win_size, n_mels, fmin, fmax):
 def process_data(hps: HParams):
     wav_fns = sorted(glob.glob(f"{hps.data_dir}/**/*.wav", recursive=True))
     print(f"Found {len(wav_fns)} wav files")
-    wav_fns = wav_fns[:50]  # * Enable for testing
+    # wav_fns = wav_fns[:50]  # * Enable for testing
     logging.info(f"Max: {mp.cpu_count()}; using 32 CPU cores")
     logging.info(f"Preprocessing {len(wav_fns)} files...")
 

@@ -1,4 +1,5 @@
-FROM pytorch/pytorch:2.0.0-cuda11.7-cudnn8-devel
+FROM pytorch/pytorch:2.4.0-cuda12.4-cudnn9-devel
+# FROM nvidia/cuda:12.4.0-devel-ubuntu20.04
 
 
 # Establecer el directorio de trabajo
@@ -14,17 +15,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Descargar e instalar la clave GPG correcta para el repositorio de CUDA
-RUN curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/3bf863cc.pub | gpg --dearmor -o /usr/share/keyrings/nvidia-archive-keyring.gpg
+RUN curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub | gpg --dearmor -o /usr/share/keyrings/nvidia-archive-keyring.gpg
 
-# Descargar e instalar la clave GPG correcta para el repositorio de machine learning
-RUN curl -fsSL https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/7fa2af80.pub | gpg --dearmor -o /usr/share/keyrings/nvidia-ml-archive-keyring.gpg
+# Descargar e instalar la clave GPG para el repositorio de machine learning
+RUN curl -fsSL https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu2004/x86_64/7fa2af80.pub | gpg --dearmor -o /usr/share/keyrings/nvidia-ml-archive-keyring.gpg
 
-# Configurar el repositorio de CUDA con la clave correcta
-RUN echo "deb [signed-by=/usr/share/keyrings/nvidia-archive-keyring.gpg] https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/ /" > /etc/apt/sources.list.d/cuda.list
-
-# Configurar el repositorio de machine learning con la clave correcta
-RUN echo "deb [signed-by=/usr/share/keyrings/nvidia-ml-archive-keyring.gpg] https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/ /" > /etc/apt/sources.list.d/nvidia-ml.list
-
+# Configurar los repositorios
+RUN echo "deb [signed-by=/usr/share/keyrings/nvidia-archive-keyring.gpg] https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /" > /etc/apt/sources.list.d/cuda.list
+RUN echo "deb [signed-by=/usr/share/keyrings/nvidia-ml-archive-keyring.gpg] https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu2004/x86_64/ /" > /etc/apt/sources.list.d/nvidia-ml.list
 # Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
@@ -39,14 +37,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     bzip2 \
     && rm -rf /var/lib/apt/lists/*
 
-# RUN apt-get update && apt-get install -y \
-#     cuda-nvrtc-11-7 \
-#     cuda-nvcc-11-7 \
-#     cuda-nvvp-11-7 \
-#     libcublas-dev-11-7 \
-#     libnvvm-samples-11-7 \
-#     libnvvm3 \
-#     && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y \
+    cuda-nvrtc-12-4 \
+    cuda-nvcc-12-4 \
+    # cuda-libraries-12-4 \
+    # cuda-libraries-dev-12-4 \
+    # libcublas-12-4 \
+    # libcublas-dev-12-4 \
+    && rm -rf /var/lib/apt/lists/*
 
 
 # Clonar el repositorio
@@ -62,6 +60,11 @@ RUN mkdir -p /app/downloaded_datasets
 ENV PYTHONPATH="/app"
 ENV DATASET_PATH="/app/downloaded_datasets/LJSpeech-1.1"
 
+ENV CUDA_HOME="/usr/local/cuda-12.4"
+ENV PATH="${CUDA_HOME}/bin:${PATH}"
+ENV LD_LIBRARY_PATH="${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}"
+# Esta variable le dice a Numba dónde encontrar el controlador CUDA
+ENV NUMBA_CUDA_DRIVER="/usr/local/cuda-12.4/compat/libcuda.so.550.54.15"
 # Asegurar permisos correctos
 RUN chmod -R 777 /app
 
