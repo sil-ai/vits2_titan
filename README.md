@@ -31,21 +31,29 @@ The original research paper: [VITS2: Improving Quality and Efficiency of Single-
 
 Follow these steps to execute the VITS2 training on the Titan HPC cluster:
 
-#### 1. Access the HPC Cluster
+#### 1. Access the HPC Cluster.
+
+Using UI
 
 1. Navigate to [https://ood.orca.offn.onenet.net/](https://ood.orca.offn.onenet.net/)
 2. Log in with your provided credentials
 3. In the cluster section, click on **titan_shell_access** to access the terminal
 
-#### 2. Setup Working Directory
+for example to aquintero@titan.orca.oru.edu the **username** is: _aquintero_
+
+or
+
+Using SSH conecction.
+
+
+
+
+#### 2. Setup Working Directory and download docker image and convert in .sif using:
 
 Create the required dataset directory:
 ```bash
 mkdir downloaded_datasets
-```
-#### 3. Download docker image and convert in .sif using:
 
-```bash
 module load singularity
 
 singularity cache clean -f
@@ -53,7 +61,7 @@ singularity pull vits2.sif docker://alejandroquinterosil/vits2:latest
 
 ```
 
-#### 4. Create Job Script
+#### 3. Create Job Script
 
 Create a `job.sh` file with the following content. This script configures SLURM job parameters including:
 - Job name and resource allocation (4 nodes, GPU partition)
@@ -79,19 +87,19 @@ module load singularity
 singularity exec --env-file .env --nv --bind $PWD/downloaded_datasets:/app/downloaded_datasets --bind /usr/lib64/libcuda.so.550.127.05:/usr/local/cuda-12.4/compat/libcuda.so.550.54.15 vits2.sif bash -c "cd /app && make all"
 ```
 
-#### 5. Configure AWS Credentials
+#### 4. Configure AWS Credentials
 
 Create a `.env` file in the same directory with your AWS S3 credentials. Model checkpoints are automatically uploaded to S3 during training, which requires these credentials, use touch .env and nano .env to modify:
 
 ```bash
 AWS_ACCESS_KEY_ID=your_access_key_here
 AWS_SECRET_ACCESS_KEY=your_secret_key_here
-AWS_STORAGE_BUCKET_NAME=your_bucket_name_here
+AWS_STORAGE_BUCKET_NAME=vits2-titan
 ```
 
 **Important**: Replace the placeholder values with your actual AWS credentials.
 
-#### 6. Submit the Job
+#### 5. Submit the Job
 
 Execute the training job using SLURM:
 ```bash
@@ -100,7 +108,7 @@ sbatch job.sh
 
 This will return a job ID (e.g., `Submitted batch job 12345`) which you can use to monitor the job status.
 
-#### 7. Monitor Job Execution
+#### 6. Monitor Job Execution
 
 The job execution generates two output files in your working directory:
 - **`myJob.{job_id}.err`**: Contains error messages and debugging information
