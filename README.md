@@ -43,10 +43,11 @@ for example to aquintero@titan.orca.oru.edu the **username** is: _aquintero_
 
 or
 
-Using SSH conecction.
+Using SSH conecction with the command and then added your password.
 
-
-
+```bash
+ssh aquintero@titan.orca.oru.edu
+```
 
 #### 2. Setup Working Directory and download docker image and convert in .sif using:
 
