@@ -68,9 +68,12 @@ class DatasetDownloader:
         metadata_path = os.path.join("downloaded_datasets", "LJSpeech-1.1", "metadata.csv")
         metadata_copy_path = os.path.join("downloaded_datasets", "LJSpeech-1.1", "metadata_copy.csv")
         if os.path.exists(metadata_path):
-            print("Copying metadata.csv to metadata_copy.csv...")
-            shutil.copy(metadata_path, metadata_copy_path)
-            print("Copy completed!")
+            if os.path.exists(metadata_copy_path):
+                print("metadata_copy.csv already exists!, skipping copy operation...")
+            else:
+                print("Copying metadata.csv to metadata_copy.csv...")
+                shutil.copy(metadata_path, metadata_copy_path)
+                print("Copy completed!")
         else:
             print("metadata.csv not found. Copy operation aborted.")
 
