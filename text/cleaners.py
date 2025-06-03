@@ -38,7 +38,7 @@ def expand_numbers(text: str, *args, **kwargs):
 
 
 def phonemize_text(text: List[str] | str, *args, language="en-us", **kwargs):
-    return phonemize(text, language=language, backend="espeak", separator=separator, strip=True, preserve_punctuation=True, punctuation_marks=_preserved_symbols_re, with_stress=True, njobs=8)
+    return phonemize(text, language=language, backend="espeak", separator=separator, strip=True, preserve_punctuation=True, punctuation_marks=_preserved_symbols_re, with_stress=True, njobs=8, preserve_empty_lines=True)
 
 
 def add_spaces(text: str, *args, **kwargs):
