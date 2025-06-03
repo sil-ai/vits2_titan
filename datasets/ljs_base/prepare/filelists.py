@@ -86,6 +86,7 @@ from text import tokenizer
 from torchtext.vocab import Vocab
 
 text_norm = data["normalized_text"].tolist()
+logging.info(f"Length of text_norm: {len(text_norm)}")
 for cleaners in text_cleaners:
     logging.info(f"Cleaning with {cleaners} ...")
     if cleaners[0] == "phonemize_text":
@@ -97,7 +98,7 @@ for cleaners in text_cleaners:
         for idx, text in enumerate(text_norm):
             temp = tokenizer(text, Vocab, cleaners, language=hps.data.language)
             text_norm[idx] = temp
-
+logging.info(f"Length of text_norm before assigning to DataFrame: {len(text_norm)}")
 data = data.assign(cleaned_text=text_norm)
 # data.head()
 
