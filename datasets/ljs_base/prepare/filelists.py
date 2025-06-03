@@ -89,7 +89,10 @@ text_norm = data["normalized_text"].tolist()
 for cleaners in text_cleaners:
     logging.info(f"Cleaning with {cleaners} ...")
     if cleaners[0] == "phonemize_text":
-        text_norm = tokenizer(text_norm, Vocab, cleaners, language=hps.data.language)
+        processed_text_norm = []
+        for text_item in text_norm:
+            processed_text_norm.append(tokenizer(text_item, Vocab, cleaners, language=hps.data.language))
+        text_norm = processed_text_norm
     else:
         for idx, text in enumerate(text_norm):
             temp = tokenizer(text, Vocab, cleaners, language=hps.data.language)
