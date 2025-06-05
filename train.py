@@ -152,6 +152,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, schedulers, scaler, loade
         with autocast(enabled=hps.train.fp16_run):
             # Generator
             y_d_hat_r, y_d_hat_g, fmap_r, fmap_g = net_d(y, y_hat)
+            loss_fm = feature_loss(fmap_r, fmap_g)
             with autocast(enabled=False):
                 loss_dur = torch.sum(l_length.float())
                 loss_mel = F.l1_loss(y_mel, y_hat_mel) * hps.train.c_mel
@@ -163,7 +164,6 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, schedulers, scaler, loade
                 loss_kl_dur = kl_loss(z_q_dur, logs_q_dur, m_p_dur, logs_p_dur, z_mask) * hps.train.c_kl_dur
                 loss_kl_audio = kl_loss_normal(m_p_audio, logs_p_audio, m_q_audio, logs_q_audio, z_mask) * hps.train.c_kl_audio
 
-                loss_fm = feature_loss(fmap_r, fmap_g)
                 loss_gen_all = loss_gen + loss_fm + loss_mel + loss_dur + loss_kl_dur + loss_kl_audio  # TODO + loss_kl_text
         optim_g.zero_grad()
         scaler.scale(loss_gen_all).backward()
