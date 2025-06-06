@@ -6,7 +6,7 @@ train:
   learning_rate: 2.0e-4
   betas: [0.8, 0.99]
   eps: 1.0e-09
-  batch_size: 64 # TODO Try more
+  batch_size: 16 # TODO Try more
   fp16_run: true
   lr_decay: 0.999875
   segment_size: 8192
