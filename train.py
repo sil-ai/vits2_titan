@@ -179,6 +179,13 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, schedulers, scaler, loade
                 losses_str = " ".join(f"{loss.item():.3f}" for loss in losses)
                 loader.set_postfix_str(f"{losses_str}, {global_step}, {lr:.9f}")
 
+                loss_kl = loss_kl_dur + loss_kl_audio
+                logger = task.get_logger(hps.model_dir)
+                logger.info(
+                    f"Epoch: {epoch}, Step: {global_step} | Loss_D: {loss_disc.item():.4f}, Loss_G: {loss_gen_all.item():.4f} "
+                    f"| Gen Components: [Gen: {loss_gen.item():.4f}, FM: {loss_fm.item():.4f}, Mel: {loss_mel.item():.4f}, Dur: {loss_dur.item():.4f}, KL: {loss_kl.item():.4f}]"
+                )
+
                 # scalar_dict = {"loss/g/total": loss_gen_all, "loss/d/total": loss_disc_all, "learning_rate": lr, "grad_norm_d": grad_norm_d, "grad_norm_g": grad_norm_g}
                 # scalar_dict.update({"loss/g/fm": loss_fm, "loss/g/mel": loss_mel, "loss/g/dur": loss_dur, "loss/g/kl": loss_kl_dur})
 
