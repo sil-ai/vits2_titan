@@ -26,7 +26,6 @@ from utils.upload_to_s3 import upload_to_s3
 torch.backends.cudnn.benchmark = True
 global_step = 0
 
-
 def main():
     """Assume Single Node Multi GPUs Training Only"""
     assert torch.cuda.is_available(), "CPU training is not allowed."
@@ -49,6 +48,7 @@ def main():
 def run(rank, n_gpus, hps):
     global global_step
     if rank == 0:
+        # Standard logger
         logger = task.get_logger(hps.model_dir)
         logger.info(hps)
         task.check_git_hash(hps.model_dir)
@@ -102,6 +102,15 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, schedulers, scaler, loade
     optim_g, optim_d = optims
     scheduler_g, scheduler_d = schedulers
     train_loader, eval_loader = loaders
+
+    # Initialize ClearML Task
+    clearml_task = task.init_clearml_task(
+        project_name="VITS2-Titan-HPC",
+        task_name="Training Run",
+        hps=hps
+    )
+    clearml_logger = clearml_task.get_logger()
+
     if writers is not None:
         writer, writer_eval = writers
 
@@ -186,6 +195,25 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, schedulers, scaler, loade
                     f"| Gen Components: [Gen: {loss_gen.item():.4f}, FM: {loss_fm.item():.4f}, Mel: {loss_mel.item():.4f}, Dur: {loss_dur.item():.4f}, KL: {loss_kl.item():.4f}]"
                 )
 
+                # ClearML metric logging
+                metrics_to_log = {
+                    "Total Loss": {"Generator": loss_gen_all.item(), "Discriminator": loss_disc_all.item()},
+                    "Generator Loss": {
+                        "Feature Map": loss_fm.item(),
+                        "Mel Spectrogram": loss_mel.item(),
+                        "Duration": loss_dur.item(),
+                        "KL Divergence": loss_kl.item(),
+                    },
+                    "Learning Rate": {"Generator": lr},
+                    "Gradient Norm": {"Generator": grad_norm_g, "Discriminator": grad_norm_d}
+                }
+                task.log_metrics_to_clearml(clearml_logger, global_step, metrics_to_log)
+                # Tensorboard logging (optional, can be removed if only using ClearML)
+                losses = [loss_disc, loss_gen, loss_fm, loss_mel, loss_dur, loss_kl_dur, loss_kl_audio]
+                losses_str = " ".join(f"{loss.item():.3f}" for loss in losses)
+                loader.set_postfix_str(f"{losses_str}, {global_step}, {lr:.9f}")
+
+
                 # scalar_dict = {"loss/g/total": loss_gen_all, "loss/d/total": loss_disc_all, "learning_rate": lr, "grad_norm_d": grad_norm_d, "grad_norm_g": grad_norm_g}
                 # scalar_dict.update({"loss/g/fm": loss_fm, "loss/g/mel": loss_mel, "loss/g/dur": loss_dur, "loss/g/kl": loss_kl_dur})
 
@@ -205,11 +233,14 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, schedulers, scaler, loade
                 # evaluate(hps, net_g, eval_loader, writer_eval)
                 g_checkpoint_path = os.path.join(hps.model_dir, "G_{}.pth".format(global_step))
                 task.save_checkpoint(net_g, optim_g, hps.train.learning_rate, epoch, g_checkpoint_path)
-                upload_to_s3(g_checkpoint_path, "G_{}.pth".format(global_step))
+                task.upload_checkpoint_to_clearml(g_checkpoint_path, f"G_{global_step}.pth")
+                # upload_to_s3(g_checkpoint_path, "G_{}.pth".format(global_step))
 
                 d_checkpoint_path = os.path.join(hps.model_dir, "D_{}.pth".format(global_step))
                 task.save_checkpoint(net_d, optim_d, hps.train.learning_rate, epoch, d_checkpoint_path)
-                upload_to_s3(d_checkpoint_path, "D_{}.pth".format(global_step))
+                task.upload_checkpoint_to_clearml(d_checkpoint_path, f"D_{global_step}.pth")
+                # upload_to_s3(d_checkpoint_path, "D_{}.pth".format(global_step))
+
         global_step += 1
 
 

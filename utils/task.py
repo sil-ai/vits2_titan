@@ -7,6 +7,9 @@ import numpy as np
 import torch
 import torchaudio
 
+from clearml import Task
+from utils.hparams import HParams
+
 MATPLOTLIB_FLAG = False
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
@@ -50,6 +53,29 @@ def save_checkpoint(model, optimizer, learning_rate, iteration, checkpoint_path)
     else:
         state_dict = model.state_dict()
     torch.save({"model": state_dict, "iteration": iteration, "optimizer": optimizer.state_dict(), "learning_rate": learning_rate}, checkpoint_path)
+
+
+def init_clearml_task(project_name: str, task_name: str, hps: HParams) -> Task:
+    """Initializes a new ClearML task and connects hyperparameters."""
+    task = Task.init(project_name=project_name, task_name=task_name, auto_connect_frameworks=False)
+    task.connect(hps, name="Hyperparameters")
+    return task
+
+
+def log_metrics_to_clearml(clearml_logger, global_step, losses):
+    """Logs a dictionary of metrics to the ClearML task."""
+    for title, series_data in losses.items():
+        for series, value in series_data.items():
+            clearml_logger.report_scalar(title=title, series=series, value=value, iteration=global_step)
+
+
+def upload_checkpoint_to_clearml(checkpoint_path: str, checkpoint_name: str):
+    """Uploads a model checkpoint as an artifact to the current ClearML task."""
+    task = Task.current_task()
+    if task:
+        task.upload_artifact(name=checkpoint_name, artifact_object=checkpoint_path)
+    else:
+        logger.warning("No active ClearML task found. Skipping artifact upload.")
 
 
 def summarize(writer, global_step, scalars={}, histograms={}, images={}, audios={}, sample_rate=22050):
