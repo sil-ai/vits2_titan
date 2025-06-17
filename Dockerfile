@@ -2,28 +2,28 @@ FROM pytorch/pytorch:2.4.0-cuda12.4-cudnn9-devel
 # FROM nvidia/cuda:12.4.0-devel-ubuntu20.04
 
 
-# Establecer el directorio de trabajo
+# set working directory
 WORKDIR /app
 
-# Eliminar archivos de repositorios preexistentes para evitar conflictos
+# remove existing repository files to avoid conflicts
 RUN rm -f /etc/apt/sources.list.d/cuda.list /etc/apt/sources.list.d/nvidia-ml.list
 
-# Instalar herramientas necesarias para manejar claves GPG
+# install necessary tools to handle GPG keys
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     gnupg \
     && rm -rf /var/lib/apt/lists/*
 
-# Descargar e instalar la clave GPG correcta para el repositorio de CUDA
+# download and install the correct GPG key for the CUDA repository
 RUN curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub | gpg --dearmor -o /usr/share/keyrings/nvidia-archive-keyring.gpg
 
-# Descargar e instalar la clave GPG para el repositorio de machine learning
+# download and install the GPG key for the machine learning repository
 RUN curl -fsSL https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu2004/x86_64/7fa2af80.pub | gpg --dearmor -o /usr/share/keyrings/nvidia-ml-archive-keyring.gpg
 
-# Configurar los repositorios
+# configure the repositories
 RUN echo "deb [signed-by=/usr/share/keyrings/nvidia-archive-keyring.gpg] https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /" > /etc/apt/sources.list.d/cuda.list
 RUN echo "deb [signed-by=/usr/share/keyrings/nvidia-ml-archive-keyring.gpg] https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu2004/x86_64/ /" > /etc/apt/sources.list.d/nvidia-ml.list
-# Instalar dependencias del sistema
+# install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     python3-dev \
@@ -47,26 +47,26 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 
-# Clonar el repositorio
+# clone the repository
 RUN git clone https://github.com/sil-ai/vits2_titan.git /app
 
-# Instalar dependencias de Python
+# install python dependencies
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
-# Crear directorio para datasets
+# create directory for datasets
 RUN mkdir -p /app/downloaded_datasets
 
-# Configurar variables de entorno
+# config environment variables
 ENV PYTHONPATH="/app"
 ENV DATASET_PATH="/app/downloaded_datasets/LJSpeech-1.1"
 
 ENV CUDA_HOME="/usr/local/cuda-12.4"
 ENV PATH="${CUDA_HOME}/bin:${PATH}"
 ENV LD_LIBRARY_PATH="${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}"
-# Esta variable le dice a Numba dónde encontrar el controlador CUDA
+# This variable tells Numba where to find the CUDA driver
 ENV NUMBA_CUDA_DRIVER="/usr/local/cuda-12.4/compat/libcuda.so.550.54.15"
-# Asegurar permisos correctos
+# ensure correct permissions
 RUN chmod -R 777 /app
 
-# Comando por defecto
+# default command
 CMD ["make", "all"]
