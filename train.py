@@ -47,8 +47,19 @@ def main():
 
 def run(rank, n_gpus, hps):
     global global_step
+    logger = None
+    clearml_logger = None
+
     if rank == 0:
-        # Standard logger
+        # Initialize ClearML Task
+        clearml_task = task.init_clearml_task(
+            project_name="VITS2-Titan-HPC",
+            task_name="Training Run",
+            hps=hps
+        )
+        clearml_logger = clearml_task.get_logger()
+
+        # Standard file logger
         logger = task.get_logger(hps.model_dir)
         logger.info(hps)
         task.check_git_hash(hps.model_dir)
@@ -90,30 +101,20 @@ def run(rank, n_gpus, hps):
 
     for epoch in range(epoch_str, hps.train.epochs + 1):
         if rank == 0:
-            train_and_evaluate(rank, epoch, hps, [net_g, net_d], [optim_g, optim_d], [scheduler_g, scheduler_d], scaler, [train_loader, eval_loader], logger, [writer, writer_eval])
+            train_and_evaluate(rank, epoch, hps, [net_g, net_d], [optim_g, optim_d], [scheduler_g, scheduler_d], scaler, [train_loader, eval_loader], logger, clearml_logger, [writer, writer_eval])
         else:
-            train_and_evaluate(rank, epoch, hps, [net_g, net_d], [optim_g, optim_d], [scheduler_g, scheduler_d], scaler, [train_loader, None], None, None)
+            train_and_evaluate(rank, epoch, hps, [net_g, net_d], [optim_g, optim_d], [scheduler_g, scheduler_d], scaler, [train_loader, None], None, None, None)
         scheduler_g.step()
         scheduler_d.step()
 
 
-def train_and_evaluate(rank, epoch, hps, nets, optims, schedulers, scaler, loaders, logger, writers):
+def train_and_evaluate(rank, epoch, hps, nets, optims, schedulers, scaler, loaders, logger, clearml_logger, writers):
     net_g, net_d = nets
     optim_g, optim_d = optims
     scheduler_g, scheduler_d = schedulers
     train_loader, eval_loader = loaders
-
-    # Initialize ClearML Task
-    clearml_task = task.init_clearml_task(
-        project_name="VITS2-Titan-HPC",
-        task_name="Training Run",
-        hps=hps
-    )
-    clearml_logger = clearml_task.get_logger()
-
     if writers is not None:
         writer, writer_eval = writers
-
     train_loader.batch_sampler.set_epoch(epoch)
     global global_step
 
