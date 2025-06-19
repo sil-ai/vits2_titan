@@ -49,17 +49,27 @@ Using SSH conecction with the command and then added your password.
 ssh aquintero@titan.orca.oru.edu
 ```
 
-#### 2. Setup Working Directory and download docker image and convert in .sif using:
+#### 2. Setup Working Directory and Download Docker Image
 
 Create the required dataset directory:
 ```bash
 mkdir downloaded_datasets
+```
 
+Next, load the Singularity module and pull the desired Docker image from Docker Hub. You can choose between the `main` (stable) and `develop` (latest features) branches.
+
+**Option A: Pull the `main` image (recommended):**
+```bash
 module load singularity
-
 singularity cache clean -f
-singularity pull vits2.sif docker://alejandroquinterosil/vits2:latest
+singularity pull vits2_main.sif docker://alejandroquinterosil/vits2:main
+```
 
+**Option B: Pull the `develop` image (for the latest changes):**
+```bash
+module load singularity
+singularity cache clean -f
+singularity pull vits2_develop.sif docker://alejandroquinterosil/vits2:develop
 ```
 
 #### 3. Create Job Script
@@ -85,20 +95,33 @@ Create a `job.sh` file with the following content. This script configures SLURM 
 
 module load singularity
 
-singularity exec --env-file .env --nv --bind $PWD/downloaded_datasets:/app/downloaded_datasets --bind /usr/lib64/libcuda.so.550.127.05:/usr/local/cuda-12.4/compat/libcuda.so.550.54.15 vits2.sif bash -c "cd /app && make all"
+# IMPORTANT: Make sure to use the correct .sif file name from the pull step (e.g., vits2_main.sif)
+singularity exec --env-file .env --nv --bind $PWD/downloaded_datasets:/app/downloaded_datasets --bind /usr/lib64/libcuda.so.550.127.05:/usr/local/cuda-12.4/compat/libcuda.so.550.54.15 vits2_main.sif bash -c "cd /app && make all"
 ```
 
-#### 4. Configure AWS Credentials
+#### 4. Configure Credentials
 
-Create a `.env` file in the same directory with your AWS S3 credentials. Model checkpoints are automatically uploaded to S3 during training, which requires these credentials, use touch .env and nano .env to modify:
+Create a `.env` file in the same directory with your credentials. Use `touch .env` and `nano .env` to create and modify it.
 
+**AWS S3 Credentials (for model checkpoint storage):**
+Model checkpoints are automatically uploaded to clearml during training, which requires these credentials.
 ```bash
 AWS_ACCESS_KEY_ID=your_access_key_here
 AWS_SECRET_ACCESS_KEY=your_secret_key_here
 AWS_STORAGE_BUCKET_NAME=vits2-titan
 ```
-
 **Important**: Replace the placeholder values with your actual AWS credentials.
+
+**ClearML Credentials (for experiment tracking):**
+The project is integrated with ClearML to log metrics, hyperparameters, and model checkpoints.
+```bash
+CLEARML_API_ACCESS_KEY=your_api_acces_key
+CLEARML_API_SECRET_KEY=your_api_secret_key
+CLEARML_API_HOST=https://api.sil.hosted.allegro.ai
+CLEARML_WEB_HOST=https://app.sil.hosted.allegro.ai
+CLEARML_FILES_HOST=https://files.sil.hosted.allegro.ai
+```
+**Important**: You can find your ClearML credentials in the "Profile" section of the ClearML web UI. The experiment tracking will fail if these are not provided.
 
 #### 5. Submit the Job
 
