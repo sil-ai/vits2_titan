@@ -25,7 +25,7 @@ print(f"Using dataset path: {path}")
 from utils.hparams import get_hparams_from_file
 # See: https://github.com/espeak-ng/espeak-ng/blob/master/docs/languages.md
 dir_data = path
-config = vits_path+"/datasets/ljs_base/config.yaml"
+config = "downloaded_datasets/config.yaml"
 symlink = vits_path+"/downloaded_datasets/DUMMY1/wavs"
 
 n_val = 100

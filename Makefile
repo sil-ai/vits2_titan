@@ -1,4 +1,4 @@
-.PHONY: preprocess filelists all clean train validate download-dataset
+.PHONY: preprocess filelists all clean train validate download-dataset copy_config
 
 ROOT_DIR ?= $(shell pwd)
 DATASET_PATH ?= $(ROOT_DIR)/downloaded_datasets/LJSpeech-1.1
@@ -6,7 +6,11 @@ CONFIG_PATH ?= datasets/ljs_base/config.yaml
 MODEL_NAME ?= ljs_base
 SYMLINK_NAME ?= DUMMY1
 
-all: download-dataset preprocess filelists train
+all: copy_config download-dataset preprocess filelists train
+
+copy_config:
+	@echo "Copying config file to downloaded_datasets..."
+	@cp $(CONFIG_PATH) downloaded_datasets/config.yaml
 
 download-dataset:
 	@echo "Downloading LJSpeech dataset..."
@@ -22,7 +26,7 @@ filelists:
 
 train:
 	@echo "Initializing training..."
-	python train.py -c $(CONFIG_PATH) -m ljs_base
+	python3 train.py -c downloaded_datasets/config.yaml -m ljs_base
 
 docker-build:
 	docker build -t vits2 .

@@ -41,7 +41,7 @@ def parse_args():
     # if not os.path.islink(link_name):
     #     os.symlink(target_path, link_name)
 
-    hparams = get_hparams_from_file(vits_path+"/datasets/ljs_base/config.yaml")
+    hparams = get_hparams_from_file("downloaded_datasets/config.yaml")
     hparams.data_dir = target_path
     return hparams
 
