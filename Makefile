@@ -6,7 +6,7 @@ CONFIG_PATH ?= datasets/ljs_base/config.yaml
 MODEL_NAME ?= ljs_base
 SYMLINK_NAME ?= DUMMY1
 
-all: copy_config download-dataset preprocess filelists train
+all:download-dataset preprocess filelists train
 
 copy_config:
 	@echo "Copying config file to downloaded_datasets..."

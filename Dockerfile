@@ -46,12 +46,14 @@ RUN apt-get update && apt-get install -y \
     # libcublas-dev-12-4 \
     && rm -rf /var/lib/apt/lists/*
 
-
-# clone the repository
-RUN git clone https://github.com/sil-ai/vits2_titan.git /app
+# Copy only the requirements file first to leverage Docker cache
+COPY requirements.txt .
 
 # install python dependencies
-RUN pip install --no-cache-dir -r /app/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the rest of the application code
+COPY . .
 
 # create directory for datasets
 RUN mkdir -p /app/downloaded_datasets

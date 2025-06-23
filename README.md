@@ -155,13 +155,16 @@ The container automatically executes the following workflow:
 
 ### Configuration
 
-The training uses the default LJSpeech configuration located at `datasets/ljs_base/config.yaml`. Key parameters:
+The training uses the default LJSpeech configuration located at `downloaded_datasets/config.yaml`. Key parameters:
 
 - **Sample Rate**: 22.05 kHz
 - **Mel Channels**: 80
 - **Batch Size**: 32
 - **Training Epochs**: 20,000
 - **GPU Support**: Multi-GPU distributed training
+
+#### Modifying Training Parameters
+To adjust the training parameters, you must create a file identical to `datasets/ljs_base/config.yaml` inside the `downloaded_datasets` directory. Once you have created this file and configured it with your desired settings, you can proceed to execute the job. The system will automatically detect your custom configuration and apply it during the training process.
 
 ### Expected Outputs
 
