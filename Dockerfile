@@ -3,11 +3,6 @@
 # FROM pytorch/pytorch:2.7.1-cuda12.8-cudnn9-runtime
 FROM pytorch/pytorch:2.7.1-cuda12.8-cudnn9-devel
 
-# eliminar volumenes e imagenes y todo lo que no se use
-RUN docker volume prune -f
-RUN docker image prune -f
-RUN docker system prune -f
-
 # set working directory
 WORKDIR /app
 
