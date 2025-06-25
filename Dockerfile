@@ -1,6 +1,6 @@
-FROM pytorch/pytorch:2.4.0-cuda12.4-cudnn9-devel
-# FROM nvidia/cuda:12.4.0-devel-ubuntu20.04
-
+# FROM nvidia/cuda:12.8.0-devel-ubuntu20.04
+# FROM pytorch/pytorch:2.4.0-cuda12.4-cudnn9-devel
+FROM pytorch/pytorch:2.7.1-cuda12.8-cudnn9-runtime
 
 # set working directory
 WORKDIR /app
@@ -38,12 +38,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && apt-get install -y \
-    cuda-nvrtc-12-4 \
-    cuda-nvcc-12-4 \
-    # cuda-libraries-12-4 \
-    # cuda-libraries-dev-12-4 \
-    # libcublas-12-4 \
-    # libcublas-dev-12-4 \
+    cuda-nvrtc-12-8 \
+    cuda-nvcc-12-8 \
+    # cuda-libraries-12-8 \
+    # cuda-libraries-dev-12-8 \
+    # libcublas-12-8 \
+    # libcublas-dev-12-8 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy only the requirements file first to leverage Docker cache
@@ -62,11 +62,11 @@ RUN mkdir -p /app/downloaded_datasets
 ENV PYTHONPATH="/app"
 ENV DATASET_PATH="/app/downloaded_datasets/LJSpeech-1.1"
 
-ENV CUDA_HOME="/usr/local/cuda-12.4"
+ENV CUDA_HOME="/usr/local/cuda-12.8"
 ENV PATH="${CUDA_HOME}/bin:${PATH}"
 ENV LD_LIBRARY_PATH="${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}"
 # This variable tells Numba where to find the CUDA driver
-ENV NUMBA_CUDA_DRIVER="/usr/local/cuda-12.4/compat/libcuda.so"
+ENV NUMBA_CUDA_DRIVER="/usr/local/cuda-12.8/compat/libcuda.so"
 # ensure correct permissions
 RUN chmod -R 777 /app
 
