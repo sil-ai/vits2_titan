@@ -1,7 +1,8 @@
 # FROM nvidia/cuda:12.8.0-devel-ubuntu20.04
 # FROM pytorch/pytorch:2.4.0-cuda12.4-cudnn9-devel
 # FROM pytorch/pytorch:2.7.1-cuda12.8-cudnn9-runtime
-FROM pytorch/pytorch:2.7.1-cuda12.8-cudnn9-devel
+# FROM pytorch/pytorch:2.7.1-cuda12.8-cudnn9-devel
+FROM nvidia/cuda:12.8.0-cudnn-devel-oraclelinux9
 
 # set working directory
 WORKDIR /app
