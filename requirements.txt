@@ -26,3 +26,10 @@ botocore==1.38.22
 python-dotenv==1.1.0
 
 clearml==2.0.0
+
+pynvml==12.0.0
+
+# Linting
+pre-commit==3.7.1
+black==24.4.2
+isort==5.13.2
