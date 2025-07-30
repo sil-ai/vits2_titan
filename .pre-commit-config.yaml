@@ -1,0 +1,24 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+    -   id: trailing-whitespace
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: check-added-large-files
+-   repo: https://github.com/psf/black
+    rev: 24.4.2
+    hooks:
+    -   id: black
+        args: [--skip-string-normalization]
+-   repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: isort (python)
+        args: ["--profile", "black"]
+
+# To ignore venv, add this to your pyproject.toml or setup.cfg if you have one.
+# If not, pre-commit's default behavior usually excludes virtual environments.
+# The following is an explicit exclusion for clarity.
+exclude: ^(venv/|\\.git/|\\.hg/|\\.mypy_cache/|\\.tox/|\\.venv/|build/|dist/)

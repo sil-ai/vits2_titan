@@ -208,7 +208,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, schedulers, scaler, loade
                     "Learning Rate": {"Generator": lr},
                     "Gradient Norm": {"Generator": grad_norm_g, "Discriminator": grad_norm_d}
                 }
-                task.log_metrics_to_clearml(clearml_logger, global_step, metrics_to_log)
+                task.log_metrics_to_clearml(clearml_logger, global_step, metrics_to_log, include_gpu_metrics=True)
                 # Tensorboard logging (optional, can be removed if only using ClearML)
                 losses = [loss_disc, loss_gen, loss_fm, loss_mel, loss_dur, loss_kl_dur, loss_kl_audio]
                 losses_str = " ".join(f"{loss.item():.3f}" for loss in losses)

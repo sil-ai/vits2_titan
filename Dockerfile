@@ -68,7 +68,7 @@ ENV CUDA_HOME="/usr/local/cuda-12.8"
 ENV PATH="${CUDA_HOME}/bin:${PATH}"
 ENV LD_LIBRARY_PATH="${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}"
 # This variable tells Numba where to find the CUDA driver
-ENV NUMBA_CUDA_DRIVER="/usr/local/cuda-12.4/compat/libcuda.so.570.86.10"
+ENV NUMBA_CUDA_DRIVER="/usr/local/cuda-12.8/compat/libcuda.so.570.86.10"
 # ensure correct permissions
 RUN chmod -R 777 /app
 

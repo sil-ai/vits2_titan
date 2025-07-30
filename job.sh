@@ -4,7 +4,7 @@
 #SBATCH -e myJob.%j.err
 #SBATCH --partition=gpu
 #SBATCH --time=2-00:00
-#SBATCH -N 4
+#SBATCH -N 1
 #SBATCH --mail-user=alejandro_quintero@sil.org
 #SBATCH --mail-type=ALL
 module load singularity

@@ -62,11 +62,24 @@ def init_clearml_task(project_name: str, task_name: str, hps: HParams) -> Task:
     return task
 
 
-def log_metrics_to_clearml(clearml_logger, global_step, losses):
+def log_metrics_to_clearml(clearml_logger, global_step, losses, include_gpu_metrics=False):
     """Logs a dictionary of metrics to the ClearML task."""
     for title, series_data in losses.items():
         for series, value in series_data.items():
             clearml_logger.report_scalar(title=title, series=series, value=value, iteration=global_step)
+
+    # Optionally log GPU metrics
+    if include_gpu_metrics:
+        gpu_metrics = get_gpu_metrics()
+        if gpu_metrics:
+            for metric_name, value in gpu_metrics.items():
+                # Group GPU metrics by type
+                if "Utilization" in metric_name and "Memory" not in metric_name:
+                    clearml_logger.report_scalar(title="GPU Utilization", series=metric_name, value=value, iteration=global_step)
+                elif "Memory" in metric_name:
+                    clearml_logger.report_scalar(title="GPU Memory", series=metric_name, value=value, iteration=global_step)
+                elif "Temperature" in metric_name:
+                    clearml_logger.report_scalar(title="GPU Temperature", series=metric_name, value=value, iteration=global_step)
 
 
 def upload_checkpoint_to_clearml(checkpoint_path: str, checkpoint_name: str):
@@ -232,3 +245,44 @@ def get_logger(model_dir, filename="train.log"):
     h.setFormatter(formatter)
     logger.addHandler(h)
     return logger
+
+
+def get_gpu_metrics():
+    """Captures GPU metrics using nvidia-ml-py if available."""
+    try:
+        import pynvml
+        pynvml.nvmlInit()
+
+        gpu_metrics = {}
+        device_count = pynvml.nvmlDeviceGetCount()
+
+        for i in range(device_count):
+            handle = pynvml.nvmlDeviceGetHandleByIndex(i)
+
+            # GPU Utilization
+            utilization = pynvml.nvmlDeviceGetUtilizationRates(handle)
+            gpu_metrics[f"GPU_{i}_Utilization"] = utilization.gpu
+            gpu_metrics[f"GPU_{i}_Memory_Utilization"] = utilization.memory
+
+            # Memory Usage
+            memory_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
+            gpu_metrics[f"GPU_{i}_Memory_Used_MB"] = memory_info.used / 1024**2
+            gpu_metrics[f"GPU_{i}_Memory_Total_MB"] = memory_info.total / 1024**2
+            gpu_metrics[f"GPU_{i}_Memory_Free_MB"] = memory_info.free / 1024**2
+            gpu_metrics[f"GPU_{i}_Memory_Usage_Percent"] = (memory_info.used / memory_info.total) * 100
+
+            # Temperature
+            try:
+                temp = pynvml.nvmlDeviceGetTemperature(handle, pynvml.NVML_TEMPERATURE_GPU)
+                gpu_metrics[f"GPU_{i}_Temperature_C"] = temp
+            except:
+                pass
+
+        return gpu_metrics
+
+    except ImportError:
+        logging.warning("pynvml not available. Install with: pip install nvidia-ml-py")
+        return {}
+    except Exception as e:
+        logging.warning(f"Failed to get GPU metrics: {e}")
+        return {}
