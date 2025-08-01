@@ -89,7 +89,7 @@ Create a `job.sh` file with the following content. This script configures SLURM 
 #SBATCH -e myJob.%j.err
 #SBATCH --partition=gpu
 #SBATCH --time=2-00:00
-#SBATCH -N 4
+#SBATCH -N 1
 #SBATCH --mail-user=your_email@domain.com
 #SBATCH --mail-type=ALL
 
