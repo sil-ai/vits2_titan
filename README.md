@@ -89,14 +89,14 @@ Create a `job.sh` file with the following content. This script configures SLURM 
 #SBATCH -e myJob.%j.err
 #SBATCH --partition=gpu
 #SBATCH --time=2-00:00
-#SBATCH -N 4
+#SBATCH -N 1
 #SBATCH --mail-user=your_email@domain.com
 #SBATCH --mail-type=ALL
 
 module load singularity
 
 # IMPORTANT: Make sure to use the correct .sif file name from the pull step (e.g., vits2_main.sif)
-singularity exec --env-file .env --nv --bind $PWD/downloaded_datasets:/app/downloaded_datasets --bind /usr/lib64/libcuda.so.550.127.05:/usr/local/cuda-12.4/compat/libcuda.so.550.54.15 vits2_main.sif bash -c "cd /app && make all"
+singularity exec --env-file .env --nv --bind $PWD/downloaded_datasets:/app/downloaded_datasets --bind /usr/lib64/libcuda.so.550.127.05:/usr/local/cuda-12.8/compat/libcuda.so.550.54.15 vits2_main.sif bash -c "cd /app && make all"
 ```
 
 #### 4. Configure Credentials
