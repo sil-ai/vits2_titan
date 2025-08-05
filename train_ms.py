@@ -171,7 +171,7 @@ def train_and_evaluate(rank, epoch, hps, nets: List[torch.nn.parallel.Distribute
         optim_g.zero_grad()
         scaler.scale(loss_gen_all).backward()
         scaler.unscale_(optim_g)
-        grad_norm_g = torch.nn.utils.clip_grad_norm_(net_g.parameters(), max_norm=5.0)
+        grad_norm_g = torch.nn.utils.clip_grad_norm_(net_g.parameters(), max_norm=1.0)
         print(f"[DEBUG] Clipped Generator Grad Norm: {grad_norm_g}")
 
         scaler.step(optim_g)
